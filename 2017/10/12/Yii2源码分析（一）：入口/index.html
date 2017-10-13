@@ -95,7 +95,7 @@
 <meta property="og:site_name" content="Linz's Blog">
 <meta property="og:description" content="写在前面：
 ​    我准备写一篇流水账式的文章来介绍yii2的源码，只是完成一次读源码的过程，所以会很细，大的概念会零散的提一提，要想理解yii2的关键概念：属性，行为(behavior)，事件(event)，依赖注入（服务定位器），别名，可以去看深入理解yii2，因为这些理念很难简单的讲清楚，但是只要理解了这些概念yii2对你就没什么难度了，剩下的就是像我这样耐心的读一遍源码，把细节的实现理解">
-<meta property="og:updated_time" content="2017-10-12T09:18:41.000Z">
+<meta property="og:updated_time" content="2017-10-13T02:09:58.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Yii2源码分析（一）：入口">
 <meta name="twitter:description" content="写在前面：
@@ -367,6 +367,7 @@
       
         <p>写在前面：</p>
 <p>​    我准备写一篇流水账式的文章来介绍yii2的源码，只是完成一次读源码的过程，所以会很细，大的概念会零散的提一提，要想理解yii2的关键概念：属性，行为(behavior)，事件(event)，依赖注入（服务定位器），别名，可以去看<a href="http://www.digpage.com/" target="_blank" rel="external">深入理解yii2</a>，因为这些理念很难简单的讲清楚，但是只要理解了这些概念yii2对你就没什么难度了，剩下的就是像我这样耐心的读一遍源码，把细节的实现理解一遍就算是熟悉yii2了。</p>
+<p>PS: 一些代码的分析会直接写在代码的注释里面，属于比较细节的实现过程，和大的概念关系不大，所以就直接陈述下而已。</p>
 <h1 id="web_u5165_u53E3_u6587_u4EF6Index-php"><a href="#web_u5165_u53E3_u6587_u4EF6Index-php" class="headerlink" title="web入口文件Index.php"></a>web入口文件Index.php</h1><p><code>defined(&#39;YII_DEBUG&#39;) or define(&#39;YII_DEBUG&#39;, true);</code></p>
 <p><code>defined(&#39;YII_ENV&#39;) or define(&#39;YII_ENV&#39;, &#39;dev&#39;);</code></p>
 <p>定义全局的常量，YII_DEBUG标识是够开启debug模式，YII_ENV标识出当前运行环境，默认env（开发）, 上线后改成prod来表示正式环境。</p>
