@@ -1,0 +1,751 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="PHP,Yii2,Yii2组件,源码," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="紧接着 base\Application的__construct下面的函数：
+123456789101112protected function registerErrorHandler(&amp;amp;$config)&amp;#123;    if (YII_ENABLE_ERROR_HANDLER) &amp;#123;        if (!isset($config[&apos;components&apos;][&apos;error">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Yii2组件分析：错误处理（ErrorHandle）">
+<meta property="og:url" content="http://yoursite.com/2017/10/13/Yii2组件分析：错误处理（ErrorHandle）/index.html">
+<meta property="og:site_name" content="Linz's Blog">
+<meta property="og:description" content="紧接着 base\Application的__construct下面的函数：
+123456789101112protected function registerErrorHandler(&amp;amp;$config)&amp;#123;    if (YII_ENABLE_ERROR_HANDLER) &amp;#123;        if (!isset($config[&apos;components&apos;][&apos;error">
+<meta property="og:updated_time" content="2017-10-16T03:52:06.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Yii2组件分析：错误处理（ErrorHandle）">
+<meta name="twitter:description" content="紧接着 base\Application的__construct下面的函数：
+123456789101112protected function registerErrorHandler(&amp;amp;$config)&amp;#123;    if (YII_ENABLE_ERROR_HANDLER) &amp;#123;        if (!isset($config[&apos;components&apos;][&apos;error">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/13/Yii2组件分析：错误处理（ErrorHandle）/"/>
+
+
+
+
+
+  <title> Yii2组件分析：错误处理（ErrorHandle） | Linz's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  ga('create', 'UA-105646091-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Linz's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/13/Yii2组件分析：错误处理（ErrorHandle）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Linz">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/yin.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Linz's Blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Yii2组件分析：错误处理（ErrorHandle）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-13T14:38:29+08:00">
+                2017-10-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Yii2/" itemprop="url" rel="index">
+                    <span itemprop="name">Yii2</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>紧接着 base\Application的__construct下面的函数：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">function</span> <span class="title">registerErrorHandler</span><span class="params">(&amp;<span class="variable">$config</span>)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (YII_ENABLE_ERROR_HANDLER) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">isset</span>(<span class="variable">$config</span>[<span class="string">'components'</span>][<span class="string">'errorHandler'</span>][<span class="string">'class'</span>])) &#123;</span><br><span class="line">            <span class="keyword">echo</span> <span class="string">"Error: no errorHandler component is configured.\n"</span>;</span><br><span class="line">            <span class="keyword">exit</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$this</span>-&gt;set(<span class="string">'errorHandler'</span>, <span class="variable">$config</span>[<span class="string">'components'</span>][<span class="string">'errorHandler'</span>]);</span><br><span class="line">        <span class="keyword">unset</span>(<span class="variable">$config</span>[<span class="string">'components'</span>][<span class="string">'errorHandler'</span>]);</span><br><span class="line">        <span class="variable">$this</span>-&gt;getErrorHandler()-&gt;register();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个函数关键点有两个：</p>
+<ol>
+<li><code>$this-&gt;set(&#39;errorHandler&#39;, $config[&#39;components&#39;][&#39;errorHandler&#39;]);</code>实例化ErrorHandle类</li>
+<li><code>$this-&gt;getErrorHandler()-&gt;register();</code>调用register()函数</li>
+</ol>
+<p>实例化就不多说了，涉及到依赖注入的概念，明白这一步就是按照config的配置来new ErrorHandle就好了。</p>
+<p>接下来看注册的函数：</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">register</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="comment">// 关掉php自带的错误显示</span></span><br><span class="line">    ini_set(<span class="string">'display_errors'</span>, <span class="keyword">false</span>);</span><br><span class="line">    <span class="comment">// 注册$this-&gt;handleException函数为异常处理器，用来处理没有被try catch到异常。</span></span><br><span class="line">    set_exception_handler([<span class="variable">$this</span>, <span class="string">'handleException'</span>]);</span><br><span class="line">    <span class="comment">// 注册错误处理器，兼容HHVM(FB开源的虚拟机)的错误处理。</span></span><br><span class="line">    <span class="keyword">if</span> (defined(<span class="string">'HHVM_VERSION'</span>)) &#123;</span><br><span class="line">        set_error_handler([<span class="variable">$this</span>, <span class="string">'handleHhvmError'</span>]);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        set_error_handler([<span class="variable">$this</span>, <span class="string">'handleError'</span>]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 预留内存，防止内存异常的时候错误处理器不能处理错误</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$this</span>-&gt;memoryReserveSize &gt; <span class="number">0</span>) &#123;</span><br><span class="line">      	<span class="comment">// 用string占用一部分内存</span></span><br><span class="line">        <span class="variable">$this</span>-&gt;_memoryReserve = str_repeat(<span class="string">'x'</span>, <span class="variable">$this</span>-&gt;memoryReserveSize);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 注册php运行中止时的处理器</span></span><br><span class="line">    register_shutdown_function([<span class="variable">$this</span>, <span class="string">'handleFatalError'</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="u5F02_u5E38_u5904_u7406_u5668"><a href="#u5F02_u5E38_u5904_u7406_u5668" class="headerlink" title="异常处理器"></a>异常处理器</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">handleException</span><span class="params">(<span class="variable">$exception</span>)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="comment">// 这个异常是Yii::$app-&gt;end()抛出的，不做处理直接返回。</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="variable">$exception</span> <span class="keyword">instanceof</span> ExitException) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 暂存当前正常处理的异常</span></span><br><span class="line">    <span class="variable">$this</span>-&gt;exception = <span class="variable">$exception</span>;</span><br><span class="line">	<span class="comment">// 关掉错误捕获，防止在处理异常时不断获取相同的错误</span></span><br><span class="line">    <span class="comment">// disable error capturing to avoid recursive errors while handling exceptions</span></span><br><span class="line">    <span class="variable">$this</span>-&gt;unregister();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// set preventive HTTP status code to 500 in case error handling somehow fails and headers are sent</span></span><br><span class="line">    <span class="comment">// HTTP exceptions will override this value in renderException()</span></span><br><span class="line">    <span class="comment">// 非命令行应用设置http响应头状态为500</span></span><br><span class="line">  	<span class="comment">// HTTP exceptions会修改状态码</span></span><br><span class="line">    <span class="keyword">if</span> (PHP_SAPI !== <span class="string">'cli'</span>) &#123;</span><br><span class="line">        http_response_code(<span class="number">500</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 写日志</span></span><br><span class="line">        <span class="variable">$this</span>-&gt;logException(<span class="variable">$exception</span>);</span><br><span class="line">      	<span class="comment">// 处理异常时中断所有输出，默认打开</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$this</span>-&gt;discardExistingOutput) &#123;</span><br><span class="line">            <span class="variable">$this</span>-&gt;clearOutput();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 显示异常信息</span></span><br><span class="line">        <span class="variable">$this</span>-&gt;renderException(<span class="variable">$exception</span>);</span><br><span class="line">        <span class="keyword">if</span> (!YII_ENV_TEST) &#123;</span><br><span class="line">            <span class="comment">// 清理日志组件暂存在内存的错误信息</span></span><br><span class="line">            \Yii::getLogger()-&gt;flush(<span class="keyword">true</span>);</span><br><span class="line">            <span class="keyword">if</span> (defined(<span class="string">'HHVM_VERSION'</span>)) &#123;</span><br><span class="line">                flush();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">exit</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">catch</span> (\<span class="keyword">Exception</span> <span class="variable">$e</span>) &#123;</span><br><span class="line">        <span class="comment">// an other exception could be thrown while displaying the exception</span></span><br><span class="line">        <span class="variable">$this</span>-&gt;handleFallbackExceptionMessage(<span class="variable">$e</span>, <span class="variable">$exception</span>);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (\Throwable <span class="variable">$e</span>) &#123;</span><br><span class="line">        <span class="comment">// 兼容php7,因为php7的异常有error类别的，所以要捕获它们共同的父级 Throwable</span></span><br><span class="line">        <span class="comment">// additional check for \Throwable introduced in PHP 7</span></span><br><span class="line">        <span class="variable">$this</span>-&gt;handleFallbackExceptionMessage(<span class="variable">$e</span>, <span class="variable">$exception</span>);</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 表示当前异常处理完成</span></span><br><span class="line">    <span class="variable">$this</span>-&gt;exception = <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>作用基本都在注释上写了，最重要的是调用了<code>$this-&gt;renderException()</code>,展示了异常页面，这里涉及了很多视图方面的代码，最后会构成最常见的报错页面，这个函数比较繁杂，不多介绍。</p>
+<h2 id="u9519_u8BEF_u5904_u7406_u5668"><a href="#u9519_u8BEF_u5904_u7406_u5668" class="headerlink" title="错误处理器"></a>错误处理器</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">handleError</span><span class="params">(<span class="variable">$code</span>, <span class="variable">$message</span>, <span class="variable">$file</span>, <span class="variable">$line</span>)</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="comment">// 检查报错</span></span><br><span class="line">    <span class="keyword">if</span> (error_reporting() &amp; <span class="variable">$code</span>) &#123;</span><br><span class="line">        <span class="comment">// 手动加载ErrorHandle，因为在autload的时候发生错误的话就不能自动加载了。</span></span><br><span class="line">        <span class="comment">// load ErrorException manually here because autoloading them will not work</span></span><br><span class="line">        <span class="comment">// when error occurs while autoloading a class</span></span><br><span class="line">        <span class="keyword">if</span> (!class_exists(<span class="string">'yii\\base\\ErrorException'</span>, <span class="keyword">false</span>)) &#123;</span><br><span class="line">            <span class="keyword">require_once</span>(<span class="keyword">__DIR__</span> . <span class="string">'/ErrorException.php'</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$exception</span> = <span class="keyword">new</span> ErrorException(<span class="variable">$message</span>, <span class="variable">$code</span>, <span class="variable">$code</span>, <span class="variable">$file</span>, <span class="variable">$line</span>);</span><br><span class="line">	   <span class="comment">// 防止错误发生在__ToString中而无法触发异常抛出</span></span><br><span class="line">        <span class="comment">// in case error appeared in __toString method we can't throw any exception</span></span><br><span class="line">        <span class="variable">$trace</span> = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);</span><br><span class="line">        array_shift(<span class="variable">$trace</span>);</span><br><span class="line">        <span class="keyword">foreach</span> (<span class="variable">$trace</span> <span class="keyword">as</span> <span class="variable">$frame</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="variable">$frame</span>[<span class="string">'function'</span>] === <span class="string">'__toString'</span>) &#123;</span><br><span class="line">                <span class="variable">$this</span>-&gt;handleException(<span class="variable">$exception</span>);</span><br><span class="line">                <span class="keyword">if</span> (defined(<span class="string">'HHVM_VERSION'</span>)) &#123;</span><br><span class="line">                    flush();</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">exit</span>(<span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">	   <span class="comment">// 抛出异常	</span></span><br><span class="line">        <span class="keyword">throw</span> <span class="variable">$exception</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>​    简单解释下四个参数，这些参数是分别是错误等级，错误信息，错误文件名， 错误发生的行号，具体可以看文档<a href="http://php.net/manual/zh/function.set-error-handler.php" target="_blank" rel="external">set_error_handler函数详解</a>。</p>
+<p>​    大致分析下错误处理函数，其实就是调用ErrorException对报错参数处理下，然后还是抛出异常，调用handleException函数。</p>
+<h1 id="u4E25_u91CD_u9519_u8BEF_u5904_u7406"><a href="#u4E25_u91CD_u9519_u8BEF_u5904_u7406" class="headerlink" title="严重错误处理"></a>严重错误处理</h1><p>​    这个函数用来处理ErrorHandle处理不了的错误类型，比如编译错误，内核错误等，这些错误用set_error_handler不能捕获。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">handleFatalError</span><span class="params">()</span></span><br><span class="line"></span>&#123;</span><br><span class="line">    <span class="comment">// 释放预留内存，在出现内存溢出是可以调用本函数处理错误</span></span><br><span class="line">    <span class="keyword">unset</span>(<span class="variable">$this</span>-&gt;_memoryReserve);</span><br><span class="line">	</span><br><span class="line">    <span class="comment">// load ErrorException manually here because autoloading them will not work</span></span><br><span class="line">    <span class="comment">// when error occurs while autoloading a class</span></span><br><span class="line">    <span class="keyword">if</span> (!class_exists(<span class="string">'yii\\base\\ErrorException'</span>, <span class="keyword">false</span>)) &#123;</span><br><span class="line">        <span class="keyword">require_once</span>(<span class="keyword">__DIR__</span> . <span class="string">'/ErrorException.php'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">	<span class="comment">// 获取最后捕获的错误信息</span></span><br><span class="line">    <span class="variable">$error</span> = error_get_last();</span><br><span class="line">	<span class="comment">// 判断错误类型是不是error_handler处理不了的类型</span></span><br><span class="line">    <span class="keyword">if</span> (ErrorException::isFatalError(<span class="variable">$error</span>)) &#123;</span><br><span class="line">        <span class="comment">// 兼容HHVM</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="keyword">empty</span>(<span class="variable">$this</span>-&gt;_hhvmException)) &#123;</span><br><span class="line">            <span class="variable">$exception</span> = <span class="variable">$this</span>-&gt;_hhvmException;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          </span><br><span class="line">            <span class="variable">$exception</span> = <span class="keyword">new</span> ErrorException(<span class="variable">$error</span>[<span class="string">'message'</span>], <span class="variable">$error</span>[<span class="string">'type'</span>], <span class="variable">$error</span>[<span class="string">'type'</span>], <span class="variable">$error</span>[<span class="string">'file'</span>], <span class="variable">$error</span>[<span class="string">'line'</span>]);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$this</span>-&gt;exception = <span class="variable">$exception</span>;</span><br><span class="line"></span><br><span class="line">        <span class="variable">$this</span>-&gt;logException(<span class="variable">$exception</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">$this</span>-&gt;discardExistingOutput) &#123;</span><br><span class="line">            <span class="variable">$this</span>-&gt;clearOutput();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="variable">$this</span>-&gt;renderException(<span class="variable">$exception</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// need to explicitly flush logs because exit() next will terminate the app immediately</span></span><br><span class="line">        Yii::getLogger()-&gt;flush(<span class="keyword">true</span>);</span><br><span class="line">        <span class="keyword">if</span> (defined(<span class="string">'HHVM_VERSION'</span>)) &#123;</span><br><span class="line">            flush();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>后半部分不注释了，因为和handleException一样。</p>
+<h1 id="u5C0F_u7ED3"><a href="#u5C0F_u7ED3" class="headerlink" title="小结"></a>小结</h1><p>​    分析完所有错误处理，发现yii2的源码大部分工作在构造合理的信息，用来显示在页面上。还有部分工作是兼容php7, xdebug，难度不大基本都是基础，通览一遍可以加深基础，还有一个小技巧：用字符串占用内存，在发生内存溢出的时候unset掉来释放掉内存，然后用这个内存来处理错误。</p>
+<p>​    最后再说一点关于错误显示的实现，因为大部分都是繁杂和兼容代码，所以大致说个过程：</p>
+<p>​    发生错误 =&gt; 调用yii2对应的errorHanlde函数 =》显示(renderException) =》 根据php传过来的参数解析对应文件，读出对应行号的代码并显示。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PHP/" rel="tag"># PHP</a>
+          
+            <a href="/tags/Yii2/" rel="tag"># Yii2</a>
+          
+            <a href="/tags/Yii2组件/" rel="tag"># Yii2组件</a>
+          
+            <a href="/tags/源码/" rel="tag"># 源码</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/13/Yii2源码分析（三）：请求和响应/" rel="next" title="Yii2源码分析（三）：请求和响应">
+                <i class="fa fa-chevron-left"></i> Yii2源码分析（三）：请求和响应
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/yin.jpg"
+               alt="Linz" />
+          <p class="site-author-name" itemprop="name">Linz</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#u5F02_u5E38_u5904_u7406_u5668"><span class="nav-number">1.</span> <span class="nav-text">异常处理器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#u9519_u8BEF_u5904_u7406_u5668"><span class="nav-number">2.</span> <span class="nav-text">错误处理器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u4E25_u91CD_u9519_u8BEF_u5904_u7406"><span class="nav-number"></span> <span class="nav-text">严重错误处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#u5C0F_u7ED3"><span class="nav-number"></span> <span class="nav-text">小结</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Linz</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
